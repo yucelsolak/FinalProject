@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Core.Utilities.Security.Encryption
 {
-    public class SingingCredentialsHelper
+    public class SigningCredentialsHelper
     {
-        public static SigningCredentials CreateSingingCredentials(SecurityKey securityKey)
+        public static SigningCredentials CreateSigningCredentials(SecurityKey securityKey)
         {
             return new SigningCredentials(securityKey,SecurityAlgorithms.HmacSha512Signature);
 
