@@ -2,6 +2,9 @@
 using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Performance;
+using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Business;
@@ -35,6 +38,7 @@ namespace Business.Concrete
 
         [SecuredOperation("product.add,admin")]
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Add(Product product)
         {
             IResult result = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
@@ -48,6 +52,7 @@ namespace Business.Concrete
             return new SuccessResult(Messages.ProductAdded);
         }
 
+        [CacheAspect]
         public IDataResult<List<Product>> GetAll()
         {
             return new SuccessDataResult<List<Product>>(_iProductDal.GetAll(), "Ürünler Listelendi");
@@ -59,6 +64,9 @@ namespace Business.Concrete
 
         }
 
+        [CacheAspect]
+        [PerformanceAspect(5)]
+        //bu metodun çalışması 5 saniyeyi geçerse beni uyar
         public IDataResult<Product> GetById(int productId)
         {
             return new SuccessDataResult<Product>(_iProductDal.Get(p => p.ProductId == productId));
@@ -75,6 +83,8 @@ namespace Business.Concrete
         }
 
         [ValidationAspect(typeof(ProductValidator))]
+        [CacheRemoveAspect("IProductService.Get")]
+        //güncelleme işlemi sonrası içinde Get geçen Product ile ilgili tüm cahceleri sil
         public IResult Update(Product product)
         {
             var result = _iProductDal.GetAll(p => p.ProductId == product.ProductId);
@@ -109,6 +119,12 @@ namespace Business.Concrete
                 return new ErrorResult(Messages.CategoryCountError);
             }
             return new SuccessResult();
+        }
+
+        [TransactionScopeAspect]
+        public IResult AddTransactionalTest(Product product)
+        {
+            throw new NotImplementedException();
         }
     }
 }
