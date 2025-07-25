@@ -44,7 +44,7 @@ namespace WebAPI.Controllers
             {
                 return Ok(result);
             }
-            return BadRequest();
+            return BadRequest(new { message = result.Message });
         }
     }
 }
